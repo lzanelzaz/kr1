@@ -1,7 +1,4 @@
-#pragma once
-
 #include<iostream>
-#include <stack>
 
 using namespace std;
 
@@ -9,23 +6,22 @@ template <class KeyType, class DataType>
 class BSTree {
 
 private:
-	size_t _size = 0;
+	size_t size = 0; // Количество элементов в дереве
 
 protected:
 
-	class Node {
+	class Node { // Узел дерева
 
 	public:
+		KeyType key; // Ключ
+		DataType value; // Значение
+		Node* leftPtr = nullptr, // Указатель на левого ребенка
+			* rightPtr = nullptr; // Указатель на правого ребенка
 
-		KeyType _key;
-		DataType _value;
-		Node* _leftPtr = nullptr,
-			* _rightPtr = nullptr;
-
-		Node(const KeyType& key, const DataType& value) : _key(key), _value(value) {}
+		Node(const KeyType& key, const DataType& value) : key(key), value(value) {}
 	};
 
-	Node* head = nullptr;
+	Node* head = nullptr; // Корень дерева
 
 public:
 
@@ -33,106 +29,104 @@ public:
 
 	~BSTree();
 
-	size_t getSize() const;
+	size_t getSize() const; // опрос размера дерева (количества узлов)
 
-	void clear();
+	void clear(); // очистка дерева (удаление всех узлов)
 
-	bool isEmpty() const;
+	bool isEmpty() const; // проверка дерева на пустоту
 
-	const DataType& find(const KeyType& key) const;
+	const DataType& find(const KeyType& key) const; // поиск данных с заданным ключом
 
-	void insert(const KeyType& key, const DataType& value);
+	void insert(const KeyType& key, const DataType& value); // включение в дерево нового узла с заданным ключом и данными
 
-	void removeByKey(const KeyType& key);
+	void removeByKey(const KeyType& key); // удаление из дерева узла с заданным ключом
 
-	void printTree();
+	void printTree(); // вывод структуры дерева на экран
 
-	void Lt_Rt_t();
+	void Lt_Rt_t(); // обход узлов в дереве по схеме Lt  Rt  t, и вывод ключей в порядке обхода
 
-	const KeyType& predecessorKey(const KeyType& key);
+	const KeyType& predecessorKey(const KeyType& key); // поиск для заданного ключа предыдущего по значению ключа в дереве
 
-	class rIterator {
+	class rIterator { // Обратный итератор
 	private:
-		stack<const Node*> q;
-
-		void initialize(const Node* node) {
-			if (node == nullptr) {
-				return;
-			}
-			initialize(node->_leftPtr);
-			q.push(node);
-			initialize(node->_rightPtr);
-		}
+		const Node* current; // Указатель на текущий узел
+		BSTree* tree; // Указатель на родительское дерево
 
 	public:
-
-		rIterator(const BSTree& tree) {
-			initialize(tree.head);
-		}
-
-		bool hasNext() {
-			return !q.empty();
-		}
-
-		const KeyType& operator* () {
-			if (!hasNext()) {
-				throw exception("Iterator is out of range");
+		rIterator(BSTree* tree) { // Создаем указатель для указанного дерева
+			this->tree = tree;
+			if (tree == nullptr) {
+				current = nullptr;
 			}
-			return q.top()->_key;
+			else {
+				current = tree->findMaxNode(tree->head); // Находим наибольший ключ дерева
+			}
 		}
 
-		rIterator& operator ++() {
-			if (!hasNext()) {
-				throw exception("Iterator is out of range");
+		const KeyType& operator* () { // Будет выводить ключи для наглядности
+			if (current == nullptr) {
+				throw exception("Вышли за пределы дерева");
 			}
-			q.pop();
+			return current->key;
+		}
+
+		rIterator& operator ++() { // поиск для заданного ключа предыдущего по значению
+			current = tree->predecessor(current);
 			return *this;
 		}
 
 		bool operator == (const rIterator& other) {
-			return q == other.q;
+			return current == other.current;
+		}
+
+		bool operator != (const rIterator& other) { // для проверки currentIterator != rend()
+			return current != other.current;
 		}
 	};
 
 	rIterator rbegin() {
-		return rIterator(*this);
+		return rIterator(this);
+	}
+
+	rIterator rend() {
+		return rIterator(nullptr);
 	}
 
 private:
 
-	void clear(Node*& node);
+	void clear(Node*& node); // Удаляем узел
 
-	const Node* findNode(const Node* node, const KeyType& key) const {
+	const Node* findNode(const Node* node, const KeyType& key) const { // Ищем рекурсивно ключ в заданном узле или его детях
 		if (node == nullptr) {
-			throw exception("Key does not exist");
+			throw exception("Ключ не существует");
 		}
-		if (node->_key == key) {
+		if (node->key == key) {
 			return node;
 		}
-		else if (key < node->_key) {
-			return findNode(node->_leftPtr, key);
+		else if (key < node->key) {
+			return findNode(node->leftPtr, key);
 		}
 		else {
-			return findNode(node->_rightPtr, key);
+			return findNode(node->rightPtr, key);
 		}
 	}
 
-	const Node* findMaxNode(const Node* node) const {
+	const Node* findMaxNode(const Node* node) const { // Ищем максимальный ключ в заданном узле или его детях
 		if (node == nullptr) {
-			throw exception("Node does not exist");
+			throw exception("Узел не существует");
 		}
-		while (node->_rightPtr != nullptr) {
-			node = node->_rightPtr;
+		while (node->rightPtr != nullptr) { // Итерируемся пока не найдем крайний правый узел
+			node = node->rightPtr;
 		}
 		return node;
 	}
 
-	const Node* rParent(const Node* node, const Node* nodeByKey) {
+	const Node* rParent(const Node* node, const Node* nodeByKey) { // Ищем родителя заданного узла
 		if (node == nodeByKey) {
 			return nullptr;
 		}
-		else if (nodeByKey->_key > node->_key) {
-			const Node* rp = rParent(node->_rightPtr, nodeByKey);
+		else if (nodeByKey->key > node->key) {
+			const Node* rp = rParent(node->rightPtr, nodeByKey);
 			if (rp != nullptr) {
 				return rp;
 			}
@@ -141,93 +135,102 @@ private:
 			}
 		}
 		else {
-			return rParent(node->_leftPtr, nodeByKey);
+			return rParent(node->leftPtr, nodeByKey);
 		}
 	}
 
-	void insert(Node*& node, const KeyType& key, const DataType& value);
+	const Node* predecessor(const Node* node) { // Предыдущий по значению ключа узел для заданного узла
+		if (node->leftPtr != nullptr) {
+			return findMaxNode(node->leftPtr); // Ищем максимальный ключ в заданном узле или его детях
+		}
+		else {
+			return rParent(head, node); // Ищем родителя заданного узла
+		}
+	}
 
-	void removeByKey(Node*& node, const KeyType& key);
+	void insert(Node*& node, const KeyType& key, const DataType& value); // включение нового узла с заданным ключом и данными в качестве ребенка заданного родительского узла или его детей
 
-	void printNode(const Node* node, const size_t& level);
+	void removeByKey(Node*& node, const KeyType& key); // удаление заданного узла или его ребенка с заданным ключом
 
-	void Lt_Rt_t(const Node* node);
+	void printNode(const Node* node, const size_t& level);  // вывод на экран заданного узла
+
+	void Lt_Rt_t(const Node* node); // обход заданного узла и его детей в дереве по схеме Lt  Rt  t, и вывод ключей в порядке обхода
 };
 
 template<class KeyType, class DataType>
-void BSTree<KeyType, DataType>::clear(Node*& node) {
+void BSTree<KeyType, DataType>::clear(Node*& node) { // удаление заданного узла и его детей
 	if (node == nullptr) {
 		return;
 	}
-	clear(node->_leftPtr);
-	clear(node->_rightPtr);
-	delete node;
-	node = nullptr;
+	clear(node->leftPtr);  // Удаляем детей слева
+	clear(node->rightPtr); // Удаляем детей справа
+	delete node; // Удаляем сам узел
+	node = nullptr; // Удаляем ссылку на очищенный узел
 }
 
 template<class KeyType, class DataType>
-void BSTree<KeyType, DataType>::insert(Node*& node, const KeyType& key, const DataType& value) {
-	if (node == nullptr) {
+void BSTree<KeyType, DataType>::insert(Node*& node, const KeyType& key, const DataType& value) {// включение нового узла с заданным ключом и данными в качестве ребенка заданного родительского узла или его детей
+	if (node == nullptr) { // Когда нашли свободное место для узла
 		node = new Node(key, value);
 		return;
 	}
-	if (node->_key == key) {
-		throw exception("Key already exists");
+	if (node->key == key) {
+		throw exception("Ключ уже существует");
 	}
-	else if (key < node->_key) {
-		insert(node->_leftPtr, key, value);
+	else if (key < node->key) {
+		insert(node->leftPtr, key, value);
 	}
 	else {
-		insert(node->_rightPtr, key, value);
+		insert(node->rightPtr, key, value);
 	}
 }
 
 template<class KeyType, class DataType>
-void BSTree<KeyType, DataType>::removeByKey(Node*& node, const KeyType& key) {
+void BSTree<KeyType, DataType>::removeByKey(Node*& node, const KeyType& key) { // удаление заданного узла или его ребенка с заданным ключом
 	if (node == nullptr) {
-		return;
+		throw exception("Ключ не найден");
 	}
-	if (node->_key == key) {
-		if (node->_leftPtr == nullptr && node->_rightPtr == nullptr) {
+	if (node->key == key) { // Нашли узел для удаления
+		if (node->leftPtr == nullptr && node->rightPtr == nullptr) { // Если нет детей - просто удаляем
 			delete node;
 			node = nullptr;
 		}
-		else if (node->_leftPtr == nullptr) {
+		else if (node->leftPtr == nullptr) { // Если нет ребенка слева - копируем на место удаляемого узла правого ребенка
 			Node* temp = node;
-			node = node->_rightPtr;
+			node = node->rightPtr;
 			delete temp;
 		}
-		else if (node->_rightPtr == nullptr) {
+		else if (node->rightPtr == nullptr) { // Если нет ребенка справа - копируем на место удаляемого узла левого ребенка
 			Node* temp = node;
-			node = node->_leftPtr;
+			node = node->leftPtr;
 			delete temp;
 		}
-		else {
-			const Node* temp = findMaxNode(node->_leftPtr);
-			node->_value = temp->_value;
-			node->_key = temp->_key;
-			removeByKey(node->_leftPtr, temp->_key);
+		else { // Оба ребенка присутствуют
+			const Node* temp = findMaxNode(node->leftPtr); // Находим максимального ребенка удаляемого узла
+			node->value = temp->value;
+			node->key = temp->key;
+			removeByKey(node->leftPtr, temp->key); // Удаляем найденного ребенка
 		}
 	}
-	else if (key < node->_key) {
-		removeByKey(node->_leftPtr, key);
+	else if (key < node->key) {
+		removeByKey(node->leftPtr, key);
 	}
 	else {
-		removeByKey(node->_rightPtr, key);
+		removeByKey(node->rightPtr, key);
 	}
 }
 
 template<class KeyType, class DataType>
-void BSTree<KeyType, DataType>::printNode(const Node* node, const size_t& level) {
+void BSTree<KeyType, DataType>::printNode(const Node* node, const size_t& level) { // вывод на экран заданного узла
 	if (node == nullptr) {
 		return;
 	}
-	printNode(node->_rightPtr, level + 1);
+	printNode(node->rightPtr, level + 1);
 	for (int i = 0; i < level; i++) {
 		cout << "   ";
 	}
-	cout << node->_key << endl;
-	printNode(node->_leftPtr, level + 1);
+	cout << node->key << endl;
+	printNode(node->leftPtr, level + 1);
 }
 
 template<class KeyType, class DataType>
@@ -235,9 +238,9 @@ void BSTree<KeyType, DataType>::Lt_Rt_t(const Node* node) {
 	if (node == nullptr) {
 		return;
 	}
-	Lt_Rt_t(node->_leftPtr);
-	Lt_Rt_t(node->_rightPtr);
-	cout << node->_key << " ";
+	Lt_Rt_t(node->leftPtr); // Сначала все узлы слева
+	Lt_Rt_t(node->rightPtr); // Потом все узлы справа
+	cout << node->key << " "; // Выводим текущий узел
 }
 
 template <class KeyType, class DataType>
@@ -249,55 +252,54 @@ BSTree<KeyType, DataType>::~BSTree() {
 }
 
 template<class KeyType, class DataType>
-size_t BSTree<KeyType, DataType>::getSize() const {
-	return _size;
+size_t BSTree<KeyType, DataType>::getSize() const {// опрос размера дерева (количества узлов)
+	return size;
 }
 
 template<class KeyType, class DataType>
-void BSTree<KeyType, DataType>::clear() {
-	_size = 0;
-	clear(head);
+void BSTree<KeyType, DataType>::clear() { // очистка дерева (удаление всех узлов)
+	size = 0;
+	clear(head); // Удаляем корневой узел и его детей
 }
 
 template <class KeyType, class DataType>
-bool BSTree<KeyType, DataType>::isEmpty() const {
-	return head == nullptr;
+bool BSTree<KeyType, DataType>::isEmpty() const { // проверка дерева на пустоту
+	return head == nullptr; // Проверяем наличие хотя бы одного узла (корневого)
 }
 
 template<class KeyType, class DataType>
-const DataType& BSTree<KeyType, DataType>::find(const KeyType& key) const {
-	return findNode(head, key)->_value;
+const DataType& BSTree<KeyType, DataType>::find(const KeyType& key) const { // поиск данных с заданным ключом
+	return findNode(head, key)->value;
 }
 
 template<class KeyType, class DataType>
-void BSTree<KeyType, DataType>::insert(const KeyType& key, const DataType& value) {
+void BSTree<KeyType, DataType>::insert(const KeyType& key, const DataType& value) { // включение в дерево нового узла с заданным ключом и данными
 	insert(head, key, value);
-	_size++;
+	size++;
 }
 
 template<class KeyType, class DataType>
-void BSTree<KeyType, DataType>::removeByKey(const KeyType& key) {
+void BSTree<KeyType, DataType>::removeByKey(const KeyType& key) { // удаление из дерева узла с заданным ключом
 	removeByKey(head, key);
 }
 
 template<class KeyType, class DataType>
-void BSTree<KeyType, DataType>::printTree() {
+void BSTree<KeyType, DataType>::printTree() { // вывод структуры дерева на экран
 	printNode(head, 0);
 }
 
 template<class KeyType, class DataType>
-void BSTree<KeyType, DataType>::Lt_Rt_t() {
+void BSTree<KeyType, DataType>::Lt_Rt_t() {  // обход узлов в дереве по схеме Lt  Rt  t, и вывод ключей в порядке обхода
 	Lt_Rt_t(head);
 	cout << endl;
 }
 
 template<class KeyType, class DataType>
-const KeyType& BSTree<KeyType, DataType>::predecessorKey(const KeyType& key) {
-	const Node* nodeForKey = findNode(head, key);
-	if (nodeForKey->_leftPtr != nullptr) {
-		return findMaxNode(nodeForKey->_leftPtr)->_key;
+const KeyType& BSTree<KeyType, DataType>::predecessorKey(const KeyType& key) { // поиск для заданного ключа предыдущего по значению ключа в дереве
+	const Node* nodeForKey = findNode(head, key); // Находим узел по ключу
+	const Node* foundNode = predecessor(nodeForKey); // Находим предшественника для найденного узла
+	if (foundNode == nullptr) {
+		throw exception("Меньший ключ не существует");
 	}
-	else {
-		return rParent(head, nodeForKey)->_key;
-	}
+	return foundNode->key;
 }

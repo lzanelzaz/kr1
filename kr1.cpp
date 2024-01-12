@@ -3,7 +3,8 @@
 
 using namespace std;
 
-/* Алгоритмы основных операций АТД (вставки, удаления и поиска) реализуются в
+/* Вариант 8
+* Алгоритмы основных операций АТД (вставки, удаления и поиска) реализуются в
 * рекурсивной форме.
 * Создание и операции обратного итератора.
 * Схема операции обхода: Lt → Rt → t.
@@ -17,7 +18,7 @@ int main() {
 	BSTree<int, string> tree = BSTree<int, string>();
 
 	int n;
-	while (1) {
+	while (true) {
 		cout << endl << "Меню. Выберите действие:" << endl << endl;
 		cout << "1. Вставка" << endl;
 		cout << "2. Удаление" << endl;
@@ -96,7 +97,7 @@ int main() {
 			}
 			case 11: {
 				auto it = tree.rbegin();
-				while (it.hasNext()) {
+				while (it != tree.rend()) {
 					cout << *it << " ";
 					++it;
 				}
