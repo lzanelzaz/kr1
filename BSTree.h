@@ -25,9 +25,9 @@ protected:
 
 public:
 
-	BSTree();
+	BSTree(); // конструктор пустого дерева
 
-	~BSTree();
+	~BSTree(); // деструктор
 
 	size_t getSize() const; // опрос размера дерева (количества узлов)
 
@@ -63,23 +63,25 @@ public:
 			}
 		}
 
-		const KeyType& operator* () { // Ѕудет выводить ключи дл€ нагл€дности
+		DataType& operator* () { // /доступ к данным текущего элемента
 			if (current == nullptr) {
 				throw exception("¬ышли за пределы дерева");
 			}
-			return current->key;
+			return current->value;
 		}
 
-		rIterator& operator ++() { // поиск дл€ заданного ключа предыдущего по значению
-			current = tree->predecessor(current);
+		rIterator& operator ++() { // оператор инкремента итератора
+			if (current != nullptr) {
+				current = tree->predecessor(current);
+			}
 			return *this;
 		}
 
-		bool operator == (const rIterator& other) {
+		bool operator == (const rIterator& other) { // проверка равенства
 			return current == other.current;
 		}
 
-		bool operator != (const rIterator& other) { // дл€ проверки currentIterator != rend()
+		bool operator != (const rIterator& other) { // проверка неравенства
 			return current != other.current;
 		}
 	};
@@ -122,16 +124,16 @@ private:
 	}
 
 	const Node* rParent(const Node* node, const Node* nodeByKey) { // »щем родител€ заданного узла
-		if (node == nodeByKey) {
+		if (node == nodeByKey) { // 2. Ќашли родител€, возращаемс€
 			return nullptr;
 		}
 		else if (nodeByKey->key > node->key) {
 			const Node* rp = rParent(node->rightPtr, nodeByKey);
 			if (rp != nullptr) {
-				return rp;
+				return rp;  // 3. Ќашли родител€, возращаемс€
 			}
 			else {
-				return node;
+				return node; // 1. Ќашли родител€, возращаемс€
 			}
 		}
 		else {

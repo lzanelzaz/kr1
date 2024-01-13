@@ -14,9 +14,7 @@ using namespace std;
 
 int main() {
 	setlocale(LC_ALL, "Russian");
-
-	BSTree<int, string> tree = BSTree<int, string>();
-
+	BSTree<int, int> tree = BSTree<int, int>();
 	int n;
 	while (true) {
 		cout << endl << "Меню. Выберите действие:" << endl << endl;
@@ -39,7 +37,7 @@ int main() {
 			switch (n) {
 			case 1: {
 				int key;
-				string value;
+				int value;
 				cin >> key >> value;
 				tree.insert(key, value);
 				break;
@@ -80,13 +78,13 @@ int main() {
 			}
 			case 9: {
 				tree.clear();
-				tree.insert(10, "a");
+				/*tree.insert(10, "a");
 				tree.insert(5, "b");
 				tree.insert(2, "c");
 				tree.insert(8, "d");
 				tree.insert(15, "e");
 				tree.insert(9, "f");
-				tree.insert(11, "g");
+				tree.insert(11, "g");*/
 				break;
 			}
 			case 10: {
@@ -105,8 +103,8 @@ int main() {
 				break;
 			}
 			case 12: {
-				BSTree<int, string>::rIterator it1 = tree.rbegin();
-				BSTree<int, string>::rIterator it2 = tree.rbegin();
+				BSTree<int, int>::rIterator it1 = tree.rbegin();
+				BSTree<int, int>::rIterator it2 = tree.rbegin();
 				cout << *it1 << " == " << *it2<<" ? -> " << (it1 == it2) << endl;
 				++it2;
 				cout << *it1 << " == " << *it2 << " ? -> " << (it1 == it2) << endl;
