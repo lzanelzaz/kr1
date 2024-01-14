@@ -15,6 +15,7 @@ using namespace std;
 int main() {
 	setlocale(LC_ALL, "Russian");
 	BSTree<int, int> tree = BSTree<int, int>();
+	auto it = tree.rend();
 	int n;
 	while (true) {
 		cout << endl << "Меню. Выберите действие:" << endl << endl;
@@ -26,10 +27,11 @@ int main() {
 		cout << "6. Обход: Lt -> Rt -> t" << endl;
 		cout << "7. Дополнительная операция: поиск для заданного ключа предыдущего по значению ключа в дереве" << endl;
 		cout << "8. Печать" << endl;
-		cout << "9. Сгенерировать дерево" << endl;
-		cout << "10. Поиск по ключу" << endl;
-		cout << "11. Проитерироваться с помощью обратного итератора" << endl;
-		cout << "12. Сравнить обратные итераторы" << endl;
+		cout << "9. Поиск по ключу" << endl;
+		cout << "10. Обнулить итератор" << endl;
+		cout << "11. Показать содержание итератора" << endl;
+		cout << "12. Перевести итератор на следующий элемент" << endl;
+		cout << "13. Присвоить итератору новое значение" << endl;
 		cout << endl;
 		cin >> n;
 		cout << endl;
@@ -77,37 +79,25 @@ int main() {
 				break;
 			}
 			case 9: {
-				tree.clear();
-				/*tree.insert(10, "a");
-				tree.insert(5, "b");
-				tree.insert(2, "c");
-				tree.insert(8, "d");
-				tree.insert(15, "e");
-				tree.insert(9, "f");
-				tree.insert(11, "g");*/
-				break;
-			}
-			case 10: {
 				int key;
 				cin >> key;
 				cout << tree.find(key) << endl;
 				break;
 			}
+			case 10: {
+				it = tree.rbegin();
+				break;
+			}
 			case 11: {
-				auto it = tree.rbegin();
-				while (it != tree.rend()) {
-					cout << *it << " ";
-					++it;
-				}
-				cout << endl;
+				cout << *it << endl;
 				break;
 			}
 			case 12: {
-				BSTree<int, int>::rIterator it1 = tree.rbegin();
-				BSTree<int, int>::rIterator it2 = tree.rbegin();
-				cout << *it1 << " == " << *it2<<" ? -> " << (it1 == it2) << endl;
-				++it2;
-				cout << *it1 << " == " << *it2 << " ? -> " << (it1 == it2) << endl;
+				++it;
+				break;
+			}
+			case 13: {
+				cin >> *it;
 				break;
 			}
 			default: {

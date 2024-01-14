@@ -49,7 +49,7 @@ public:
 
 	class rIterator { // Обратный итератор
 	private:
-		const Node* current; // Указатель на текущий узел
+		Node* current; // Указатель на текущий узел
 		BSTree* tree; // Указатель на родительское дерево
 
 	public:
@@ -113,22 +113,23 @@ private:
 		}
 	}
 
-	const Node* findMaxNode(const Node* node) const { // Ищем максимальный ключ в заданном узле или его детях
+	Node* findMaxNode(Node* node) const { // Ищем максимальный ключ в заданном узле или его детях
 		if (node == nullptr) {
 			throw exception("Узел не существует");
 		}
-		while (node->rightPtr != nullptr) { // Итерируемся пока не найдем крайний правый узел
-			node = node->rightPtr;
+		Node* buf = node;
+		while (buf->rightPtr != nullptr) { // Итерируемся пока не найдем крайний правый узел
+			buf = buf->rightPtr;
 		}
-		return node;
+		return buf;
 	}
 
-	const Node* rParent(const Node* node, const Node* nodeByKey) { // Ищем родителя заданного узла
+	Node* rParent(Node* node, const Node* nodeByKey) { // Ищем родителя заданного узла
 		if (node == nodeByKey) { // 2. Нашли родителя, возращаемся
 			return nullptr;
 		}
 		else if (nodeByKey->key > node->key) {
-			const Node* rp = rParent(node->rightPtr, nodeByKey);
+			Node* rp = rParent(node->rightPtr, nodeByKey);
 			if (rp != nullptr) {
 				return rp;  // 3. Нашли родителя, возращаемся
 			}
@@ -141,7 +142,7 @@ private:
 		}
 	}
 
-	const Node* predecessor(const Node* node) { // Предыдущий по значению ключа узел для заданного узла
+	Node* predecessor(const Node* node) { // Предыдущий по значению ключа узел для заданного узла
 		if (node->leftPtr != nullptr) {
 			return findMaxNode(node->leftPtr); // Ищем максимальный ключ в заданном узле или его детях
 		}
